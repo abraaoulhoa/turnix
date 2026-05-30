@@ -76,9 +76,7 @@ const EQUIPAMENTOS_PADRAO = [
 ] as const;
 
 type Tema = { [Campo in keyof typeof TEMA_PADRAO]: string };
-type Textos = { [Campo in keyof typeof TEXTOS_PADRAO]: string };
 type CampoTema = keyof Tema;
-type CampoTexto = keyof Textos;
 type Equipamento = {
   nome: string;
   operacao: string;
@@ -124,9 +122,6 @@ export default function App() {
   const [tema, setTema] = useState<Tema>(() =>
     carregarLocalStorage("turnix-tema", TEMA_PADRAO),
   );
-  const [textos, setTextos] = useState<Textos>(() =>
-    carregarLocalStorage("turnix-textos", TEXTOS_PADRAO),
-  );
 
   const [dados, setDados] = useState({
     onlines: "",
@@ -140,14 +135,11 @@ export default function App() {
   );
 
   const [copiado, setCopiado] = useState(false);
+  const textos = TEXTOS_PADRAO;
 
   useEffect(() => {
     localStorage.setItem("turnix-tema", JSON.stringify(tema));
   }, [tema]);
-
-  useEffect(() => {
-    localStorage.setItem("turnix-textos", JSON.stringify(textos));
-  }, [textos]);
 
   useEffect(() => {
     localStorage.setItem("turnix-equipamentos", JSON.stringify(equipamentos));
@@ -187,10 +179,6 @@ export default function App() {
     setTema((atual) => ({ ...atual, [campo]: valor }));
   }
 
-  function atualizarTexto(campo: CampoTexto, valor: string) {
-    setTextos((atual) => ({ ...atual, [campo]: valor }));
-  }
-
   function adicionarEquipamento() {
     setEquipamentos((lista) => [
       ...lista,
@@ -214,7 +202,6 @@ export default function App() {
   }
 
   function restaurarTudo() {
-    setTextos(TEXTOS_PADRAO);
     setEquipamentos([...EQUIPAMENTOS_PADRAO]);
   }
 
@@ -322,23 +309,6 @@ export default function App() {
                 >
                   Restaurar conteúdo
                 </button>
-              </div>
-            </div>
-
-            <div className="admin-block">
-              <h3>Textos do app</h3>
-              <div className="field-grid">
-                {Object.entries(textos).map(([campo, valor]) => (
-                  <label className="field" key={campo}>
-                    <span>{campo}</span>
-                    <input
-                      value={valor}
-                      onChange={(e) =>
-                        atualizarTexto(campo as CampoTexto, e.target.value)
-                      }
-                    />
-                  </label>
-                ))}
               </div>
             </div>
 
