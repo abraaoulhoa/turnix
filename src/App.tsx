@@ -7,7 +7,6 @@ const CALIBRACAO = {
   NAO_REALIZADA: "Não realizada",
 } as const;
 const NAO_APLICAVEL = "N.A.";
-const SENHA_ADMIN = "1234";
 const TEMA_PADRAO = {
   fundo: "#eef7f3",
   texto: "#17313b",
@@ -256,24 +255,6 @@ export default function App() {
     window.open(`https://wa.me/?text=${texto}`, "_blank");
   }
 
-  function alternarAdmin() {
-    if (adminAberto) {
-      setAdminAberto(false);
-      return;
-    }
-
-    const senha = window.prompt("Senha de administrador");
-
-    if (senha === SENHA_ADMIN) {
-      setAdminAberto(true);
-      return;
-    }
-
-    if (senha !== null) {
-      alert("Senha incorreta.");
-    }
-  }
-
   const coresTurno =
     CORES_TURNO[dados.turno as keyof typeof CORES_TURNO] ?? CORES_TURNO.C;
   const temaStyle: TemaStyle = {
@@ -303,7 +284,7 @@ export default function App() {
           <div className="header-actions">
             <button
               className="admin-toggle"
-              onClick={alternarAdmin}
+              onClick={() => setAdminAberto((aberto) => !aberto)}
               type="button"
             >
               {adminAberto ? "Fechar admin" : "Administrador"}
