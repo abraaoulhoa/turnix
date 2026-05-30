@@ -16,6 +16,23 @@ const TEMA_PADRAO = {
   sucesso: "#86efac",
   alerta: "#ffedd5",
 } as const;
+const CORES_TURNO = {
+  A: {
+    fundo: "#064e3b",
+    seloFundo: "#052e2b",
+    seloTexto: "#ffffff",
+  },
+  B: {
+    fundo: "#bbf7d0",
+    seloFundo: "#86efac",
+    seloTexto: "#064e3b",
+  },
+  C: {
+    fundo: "#ffffff",
+    seloFundo: "#ffffff",
+    seloTexto: "#17313b",
+  },
+} as const;
 const TEXTOS_PADRAO = {
   titulo: "Turnix",
   subtitulo: "Gere relatórios de turno em segundos.",
@@ -251,6 +268,8 @@ export default function App() {
     window.open(`https://wa.me/?text=${texto}`, "_blank");
   }
 
+  const coresTurno =
+    CORES_TURNO[dados.turno as keyof typeof CORES_TURNO] ?? CORES_TURNO.C;
   const temaStyle: TemaStyle = {
     "--app-bg": tema.fundo,
     "--app-text": tema.texto,
@@ -259,6 +278,9 @@ export default function App() {
     "--app-accent": tema.destaque,
     "--app-success": tema.sucesso,
     "--app-alert": tema.alerta,
+    "--shift-bg": coresTurno.fundo,
+    "--shift-badge-bg": coresTurno.seloFundo,
+    "--shift-badge-text": coresTurno.seloTexto,
   };
 
   return (

@@ -2,10 +2,8 @@
   min-height: 100svh;
   padding: 24px;
   color: var(--app-text);
-  background:
-    linear-gradient(135deg, rgba(16, 185, 129, 0.14), transparent 38%),
-    linear-gradient(315deg, rgba(14, 116, 144, 0.12), transparent 42%),
-    var(--app-bg);
+  background: var(--shift-bg, var(--app-bg));
+  transition: background 0.2s ease;
 }
 
 .app-container {
@@ -48,9 +46,10 @@
 .header-badge {
   flex: 0 0 auto;
   padding: 8px 12px;
+  border: 1px solid rgba(8, 49, 47, 0.16);
   border-radius: 999px;
-  color: #08312f;
-  background: var(--app-success);
+  color: var(--shift-badge-text);
+  background: var(--shift-badge-bg);
   font-size: 14px;
   font-weight: 800;
 }
