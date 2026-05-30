@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useState } from "react";
 import "./App.css";
 
 const OPERACAO = { OPERANDO: "Operando", PARADO: "Parado" } as const;
@@ -7,8 +7,36 @@ const CALIBRACAO = {
   NAO_REALIZADA: "Não realizada",
 } as const;
 const NAO_APLICAVEL = "N.A.";
+const TEMA_PADRAO = {
+  fundo: "#eef7f3",
+  texto: "#17313b",
+  primaria: "#0f766e",
+  secundaria: "#155e75",
+  destaque: "#5eead4",
+  sucesso: "#86efac",
+  alerta: "#ffedd5",
+} as const;
+
+type Tema = typeof TEMA_PADRAO;
+type CampoTema = keyof Tema;
+type TemaStyle = CSSProperties & Record<`--${string}`, string>;
 
 export default function App() {
+  const [adminAberto, setAdminAberto] = useState(false);
+  const [tema, setTema] = useState<Tema>(() => {
+    const temaSalvo = localStorage.getItem("turnix-tema");
+
+    if (!temaSalvo) {
+      return TEMA_PADRAO;
+    }
+
+    try {
+      return { ...TEMA_PADRAO, ...JSON.parse(temaSalvo) };
+    } catch {
+      return TEMA_PADRAO;
+    }
+  });
+
   const [dados, setDados] = useState({
     onlines: "",
     turno: "C",
@@ -45,6 +73,10 @@ export default function App() {
 
   const [copiado, setCopiado] = useState(false);
 
+  useEffect(() => {
+    localStorage.setItem("turnix-tema", JSON.stringify(tema));
+  }, [tema]);
+
   function formatarData(dataIso: string | undefined) {
     if (!dataIso) return "";
     const [ano, mes, dia] = dataIso.split("-");
@@ -61,6 +93,14 @@ export default function App() {
         i === index ? { ...item, [campo]: valor } : item,
       ),
     );
+  }
+
+  function atualizarTema(campo: CampoTema, valor: string) {
+    setTema((atual) => ({ ...atual, [campo]: valor }));
+  }
+
+  function restaurarTema() {
+    setTema(TEMA_PADRAO);
   }
 
   function statusOperacao(valor: string) {
@@ -113,16 +153,65 @@ export default function App() {
     window.open(`https://wa.me/?text=${texto}`, "_blank");
   }
 
+  const temaStyle: TemaStyle = {
+    "--app-bg": tema.fundo,
+    "--app-text": tema.texto,
+    "--app-primary": tema.primaria,
+    "--app-secondary": tema.secundaria,
+    "--app-accent": tema.destaque,
+    "--app-success": tema.sucesso,
+    "--app-alert": tema.alerta,
+  };
+
   return (
-    <main className="app-shell">
+    <main className="app-shell" style={temaStyle}>
       <div className="app-container">
         <header className="app-header">
           <div>
             <h1>Turnix</h1>
             <p>Gere relatórios de turno em segundos.</p>
           </div>
-          <span className="header-badge">Turno {dados.turno}</span>
+          <div className="header-actions">
+            <button
+              className="admin-toggle"
+              onClick={() => setAdminAberto((aberto) => !aberto)}
+              type="button"
+            >
+              {adminAberto ? "Fechar admin" : "Administrador"}
+            </button>
+            <span className="header-badge">Turno {dados.turno}</span>
+          </div>
         </header>
+
+        {adminAberto && (
+          <section className="admin-panel">
+            <div className="panel-title-row">
+              <h2>Administrador</h2>
+              <button
+                className="button-secondary"
+                onClick={restaurarTema}
+                type="button"
+              >
+                Restaurar padrão
+              </button>
+            </div>
+
+            <div className="theme-grid">
+              {Object.entries(tema).map(([campo, valor]) => (
+                <label className="color-field" key={campo}>
+                  <span>{campo}</span>
+                  <input
+                    type="color"
+                    value={valor}
+                    onChange={(e) =>
+                      atualizarTema(campo as CampoTema, e.target.value)
+                    }
+                  />
+                </label>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="panel">
           <h2>Dados gerais</h2>
