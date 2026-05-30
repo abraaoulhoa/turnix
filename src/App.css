@@ -93,6 +93,44 @@
   box-shadow: 0 18px 45px rgba(23, 49, 59, 0.12);
 }
 
+.admin-panel h3 {
+  margin: 0;
+  color: #31535d;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-block {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid #d5e7e0;
+  padding-top: 16px;
+}
+
+.admin-equipment-list {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-equipment-card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid #d5e7e0;
+  border-radius: 8px;
+  padding: 14px;
+  background: #f8fcfa;
+}
+
+.admin-equipment-card strong {
+  color: var(--app-primary);
+}
+
 .panel-title-row {
   display: flex;
   align-items: center;
@@ -141,6 +179,25 @@
   color: #31535d;
   font-size: 14px;
   font-weight: 800;
+}
+
+.toggle-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  align-self: end;
+  min-height: 48px;
+  padding: 10px 0;
+}
+
+.toggle-field input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--app-primary);
+}
+
+.toggle-field span {
+  line-height: 1.25;
 }
 
 .theme-grid {
@@ -269,6 +326,12 @@ button:focus-visible {
   background: var(--app-success);
 }
 
+.button-danger {
+  min-height: 38px;
+  color: #7c2d12;
+  background: var(--app-alert);
+}
+
 .admin-toggle,
 .button-secondary {
   min-height: 40px;
@@ -311,8 +374,15 @@ button:focus-visible {
   }
 
   .panel-title-row,
-  .header-actions {
+  .header-actions,
+  .admin-actions {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .panel-title-row > button,
+  .admin-actions,
+  .admin-actions button {
+    width: 100%;
   }
 }

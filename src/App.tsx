@@ -16,26 +16,100 @@ const TEMA_PADRAO = {
   sucesso: "#86efac",
   alerta: "#ffedd5",
 } as const;
+const TEXTOS_PADRAO = {
+  titulo: "Turnix",
+  subtitulo: "Gere relatórios de turno em segundos.",
+  tituloDados: "Dados gerais",
+  tituloRelatorio: "Relatório gerado",
+  prefixoRelatorio: "RELATÓRIO DE TURNO",
+  onlines: "Onlines",
+  turno: "Turno",
+  escala: "Escala",
+  data: "Data",
+  operacao: "Operação",
+  problema: "Problema",
+  acoes: "Ações tomadas",
+  calibracao: "Calibração",
+} as const;
+const EQUIPAMENTOS_PADRAO = [
+  {
+    nome: "PSI",
+    operacao: OPERACAO.OPERANDO,
+    problema: NAO_APLICAVEL,
+    acoes: NAO_APLICAVEL,
+    calibracao: CALIBRACAO.REALIZADA,
+    usaAcoes: true,
+  },
+  {
+    nome: "BLUECUB",
+    operacao: OPERACAO.OPERANDO,
+    problema: NAO_APLICAVEL,
+    acoes: NAO_APLICAVEL,
+    calibracao: CALIBRACAO.REALIZADA,
+    usaAcoes: false,
+  },
+  {
+    nome: "COURIER",
+    operacao: OPERACAO.OPERANDO,
+    problema: NAO_APLICAVEL,
+    acoes: NAO_APLICAVEL,
+    calibracao: CALIBRACAO.REALIZADA,
+    usaAcoes: true,
+  },
+] as const;
 
-type Tema = typeof TEMA_PADRAO;
+type Tema = { [Campo in keyof typeof TEMA_PADRAO]: string };
+type Textos = { [Campo in keyof typeof TEXTOS_PADRAO]: string };
 type CampoTema = keyof Tema;
+type CampoTexto = keyof Textos;
+type Equipamento = {
+  nome: string;
+  operacao: string;
+  problema: string;
+  acoes: string;
+  calibracao: string;
+  usaAcoes: boolean;
+};
+type CampoEquipamento = keyof Equipamento;
 type TemaStyle = CSSProperties & Record<`--${string}`, string>;
+
+function carregarLocalStorage<T>(chave: string, padrao: T): T {
+  const valorSalvo = localStorage.getItem(chave);
+
+  if (!valorSalvo) {
+    return padrao;
+  }
+
+  try {
+    return { ...padrao, ...JSON.parse(valorSalvo) };
+  } catch {
+    return padrao;
+  }
+}
+
+function carregarListaLocalStorage<T>(chave: string, padrao: T[]): T[] {
+  const valorSalvo = localStorage.getItem(chave);
+
+  if (!valorSalvo) {
+    return padrao;
+  }
+
+  try {
+    const lista = JSON.parse(valorSalvo);
+    return Array.isArray(lista) ? lista : padrao;
+  } catch {
+    return padrao;
+  }
+}
 
 export default function App() {
   const [adminAberto, setAdminAberto] = useState(false);
-  const [tema, setTema] = useState<Tema>(() => {
-    const temaSalvo = localStorage.getItem("turnix-tema");
-
-    if (!temaSalvo) {
-      return TEMA_PADRAO;
-    }
-
-    try {
-      return { ...TEMA_PADRAO, ...JSON.parse(temaSalvo) };
-    } catch {
-      return TEMA_PADRAO;
-    }
-  });
+  const [tema, setTema] = useState<Tema>(() =>
+    carregarLocalStorage("turnix-tema", TEMA_PADRAO),
+  );
+  const [textos, setTextos] = useState<Textos>(() =>
+    carregarLocalStorage("turnix-textos", TEXTOS_PADRAO),
+  );
 
   const [dados, setDados] = useState({
     onlines: "",
@@ -44,38 +118,23 @@ export default function App() {
     data: "2026-05-24",
   });
 
-  const [equipamentos, setEquipamentos] = useState([
-    {
-      nome: "PSI",
-      operacao: OPERACAO.OPERANDO,
-      problema: NAO_APLICAVEL,
-      acoes: NAO_APLICAVEL,
-      calibracao: CALIBRACAO.REALIZADA,
-      usaAcoes: true,
-    },
-    {
-      nome: "BLUECUB",
-      operacao: OPERACAO.OPERANDO,
-      problema: NAO_APLICAVEL,
-      acoes: NAO_APLICAVEL,
-      calibracao: CALIBRACAO.REALIZADA,
-      usaAcoes: false,
-    },
-    {
-      nome: "COURIER",
-      operacao: OPERACAO.OPERANDO,
-      problema: NAO_APLICAVEL,
-      acoes: NAO_APLICAVEL,
-      calibracao: CALIBRACAO.REALIZADA,
-      usaAcoes: true,
-    },
-  ]);
+  const [equipamentos, setEquipamentos] = useState<Equipamento[]>(() =>
+    carregarListaLocalStorage("turnix-equipamentos", [...EQUIPAMENTOS_PADRAO]),
+  );
 
   const [copiado, setCopiado] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("turnix-tema", JSON.stringify(tema));
   }, [tema]);
+
+  useEffect(() => {
+    localStorage.setItem("turnix-textos", JSON.stringify(textos));
+  }, [textos]);
+
+  useEffect(() => {
+    localStorage.setItem("turnix-equipamentos", JSON.stringify(equipamentos));
+  }, [equipamentos]);
 
   function formatarData(dataIso: string | undefined) {
     if (!dataIso) return "";
@@ -95,12 +154,51 @@ export default function App() {
     );
   }
 
+  function atualizarEquipamentoAdmin(
+    index: number,
+    campo: CampoEquipamento,
+    valor: string | boolean,
+  ) {
+    setEquipamentos((lista) =>
+      lista.map((item, i) =>
+        i === index ? { ...item, [campo]: valor } : item,
+      ),
+    );
+  }
+
   function atualizarTema(campo: CampoTema, valor: string) {
     setTema((atual) => ({ ...atual, [campo]: valor }));
   }
 
+  function atualizarTexto(campo: CampoTexto, valor: string) {
+    setTextos((atual) => ({ ...atual, [campo]: valor }));
+  }
+
+  function adicionarEquipamento() {
+    setEquipamentos((lista) => [
+      ...lista,
+      {
+        nome: `Equipamento ${lista.length + 1}`,
+        operacao: OPERACAO.OPERANDO,
+        problema: NAO_APLICAVEL,
+        acoes: NAO_APLICAVEL,
+        calibracao: CALIBRACAO.REALIZADA,
+        usaAcoes: true,
+      },
+    ]);
+  }
+
+  function removerEquipamento(index: number) {
+    setEquipamentos((lista) => lista.filter((_, i) => i !== index));
+  }
+
   function restaurarTema() {
     setTema(TEMA_PADRAO);
+  }
+
+  function restaurarTudo() {
+    setTextos(TEXTOS_PADRAO);
+    setEquipamentos([...EQUIPAMENTOS_PADRAO]);
   }
 
   function statusOperacao(valor: string) {
@@ -116,27 +214,27 @@ export default function App() {
   const relatorio = useMemo(() => {
     const linhas = [];
 
-    linhas.push(`*RELATÓRIO DE TURNO ${dados.turno}*`);
+    linhas.push(`*${textos.prefixoRelatorio} ${dados.turno}*`);
     linhas.push("──────────────────");
-    linhas.push(`👤 *Onlines:* ${dados.onlines || ""}`);
-    linhas.push(`🔄 Turno: ${dados.turno}`);
-    linhas.push(`🕐 Escala: ${dados.escala}`);
-    linhas.push(`📅 Data: ${formatarData(dados.data)}`);
+    linhas.push(`👤 *${textos.onlines}:* ${dados.onlines || ""}`);
+    linhas.push(`🔄 ${textos.turno}: ${dados.turno}`);
+    linhas.push(`🕐 ${textos.escala}: ${dados.escala}`);
+    linhas.push(`📅 ${textos.data}: ${formatarData(dados.data)}`);
     linhas.push("──────────────────");
 
     equipamentos.forEach((eq) => {
       linhas.push(`📊 ${eq.nome}`);
-      linhas.push(`▪️ Operação: ${statusOperacao(eq.operacao)}`);
-      linhas.push(`▪️ Problema: ${eq.problema || NAO_APLICAVEL}`);
+      linhas.push(`▪️ ${textos.operacao}: ${statusOperacao(eq.operacao)}`);
+      linhas.push(`▪️ ${textos.problema}: ${eq.problema || NAO_APLICAVEL}`);
       if (eq.usaAcoes) {
-        linhas.push(`▪️ Ações tomadas: ${eq.acoes || NAO_APLICAVEL}`);
+        linhas.push(`▪️ ${textos.acoes}: ${eq.acoes || NAO_APLICAVEL}`);
       }
-      linhas.push(`▪️ Calibração: ${statusCalibracao(eq.calibracao)}`);
+      linhas.push(`▪️ ${textos.calibracao}: ${statusCalibracao(eq.calibracao)}`);
       linhas.push("──────────────────");
     });
 
     return linhas.join("\n");
-  }, [dados, equipamentos]);
+  }, [dados, equipamentos, textos]);
 
   async function copiarRelatorio() {
     try {
@@ -168,8 +266,8 @@ export default function App() {
       <div className="app-container">
         <header className="app-header">
           <div>
-            <h1>Turnix</h1>
-            <p>Gere relatórios de turno em segundos.</p>
+            <h1>{textos.titulo}</h1>
+            <p>{textos.subtitulo}</p>
           </div>
           <div className="header-actions">
             <button
@@ -187,15 +285,168 @@ export default function App() {
           <section className="admin-panel">
             <div className="panel-title-row">
               <h2>Administrador</h2>
-              <button
-                className="button-secondary"
-                onClick={restaurarTema}
-                type="button"
-              >
-                Restaurar padrão
-              </button>
+              <div className="admin-actions">
+                <button
+                  className="button-secondary"
+                  onClick={restaurarTema}
+                  type="button"
+                >
+                  Restaurar cores
+                </button>
+                <button
+                  className="button-secondary"
+                  onClick={restaurarTudo}
+                  type="button"
+                >
+                  Restaurar conteúdo
+                </button>
+              </div>
             </div>
 
+            <div className="admin-block">
+              <h3>Textos do app</h3>
+              <div className="field-grid">
+                {Object.entries(textos).map(([campo, valor]) => (
+                  <label className="field" key={campo}>
+                    <span>{campo}</span>
+                    <input
+                      value={valor}
+                      onChange={(e) =>
+                        atualizarTexto(campo as CampoTexto, e.target.value)
+                      }
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="admin-block">
+              <div className="panel-title-row">
+                <h3>Equipamentos</h3>
+                <button
+                  className="button-primary"
+                  onClick={adicionarEquipamento}
+                  type="button"
+                >
+                  Adicionar equipamento
+                </button>
+              </div>
+
+              <div className="admin-equipment-list">
+                {equipamentos.map((eq, index) => (
+                  <div className="admin-equipment-card" key={`${eq.nome}-${index}`}>
+                    <div className="panel-title-row">
+                      <strong>{eq.nome || `Equipamento ${index + 1}`}</strong>
+                      <button
+                        className="button-danger"
+                        onClick={() => removerEquipamento(index)}
+                        type="button"
+                      >
+                        Remover
+                      </button>
+                    </div>
+
+                    <div className="field-grid">
+                      <label className="field">
+                        <span>Nome</span>
+                        <input
+                          value={eq.nome}
+                          onChange={(e) =>
+                            atualizarEquipamentoAdmin(
+                              index,
+                              "nome",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </label>
+
+                      <label className="field">
+                        <span>Operação inicial</span>
+                        <select
+                          value={eq.operacao}
+                          onChange={(e) =>
+                            atualizarEquipamentoAdmin(
+                              index,
+                              "operacao",
+                              e.target.value,
+                            )
+                          }
+                        >
+                          <option>{OPERACAO.OPERANDO}</option>
+                          <option>{OPERACAO.PARADO}</option>
+                        </select>
+                      </label>
+
+                      <label className="field">
+                        <span>Calibração inicial</span>
+                        <select
+                          value={eq.calibracao}
+                          onChange={(e) =>
+                            atualizarEquipamentoAdmin(
+                              index,
+                              "calibracao",
+                              e.target.value,
+                            )
+                          }
+                        >
+                          <option>{CALIBRACAO.REALIZADA}</option>
+                          <option>{CALIBRACAO.NAO_REALIZADA}</option>
+                        </select>
+                      </label>
+
+                      <label className="field toggle-field">
+                        <input
+                          checked={eq.usaAcoes}
+                          type="checkbox"
+                          onChange={(e) =>
+                            atualizarEquipamentoAdmin(
+                              index,
+                              "usaAcoes",
+                              e.target.checked,
+                            )
+                          }
+                        />
+                        <span>Mostrar ações tomadas</span>
+                      </label>
+
+                      <label className="field field-full">
+                        <span>Problema inicial</span>
+                        <textarea
+                          value={eq.problema}
+                          onChange={(e) =>
+                            atualizarEquipamentoAdmin(
+                              index,
+                              "problema",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </label>
+
+                      {eq.usaAcoes && (
+                        <label className="field field-full">
+                          <span>Ações iniciais</span>
+                          <textarea
+                            value={eq.acoes}
+                            onChange={(e) =>
+                              atualizarEquipamentoAdmin(
+                                index,
+                                "acoes",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="admin-block">
+              <h3>Cores</h3>
             <div className="theme-grid">
               {Object.entries(tema).map(([campo, valor]) => (
                 <label className="color-field" key={campo}>
@@ -210,14 +461,15 @@ export default function App() {
                 </label>
               ))}
             </div>
+            </div>
           </section>
         )}
 
         <section className="panel">
-          <h2>Dados gerais</h2>
+          <h2>{textos.tituloDados}</h2>
 
           <label className="field field-full">
-            <span>Onlines</span>
+            <span>{textos.onlines}</span>
             <input
               value={dados.onlines}
               onChange={(e) => atualizarDados("onlines", e.target.value)}
@@ -227,7 +479,7 @@ export default function App() {
 
           <div className="field-grid field-grid-three">
             <label className="field">
-              <span>Turno</span>
+              <span>{textos.turno}</span>
               <select
                 value={dados.turno}
                 onChange={(e) => atualizarDados("turno", e.target.value)}
@@ -239,7 +491,7 @@ export default function App() {
             </label>
 
             <label className="field">
-              <span>Escala</span>
+              <span>{textos.escala}</span>
               <input
                 value={dados.escala}
                 onChange={(e) => atualizarDados("escala", e.target.value)}
@@ -247,7 +499,7 @@ export default function App() {
             </label>
 
             <label className="field">
-              <span>Data</span>
+              <span>{textos.data}</span>
               <input
                 type="date"
                 value={dados.data}
@@ -259,7 +511,7 @@ export default function App() {
 
         {equipamentos.map((eq, index) => (
           <section
-            key={eq.nome}
+            key={`${eq.nome}-${index}`}
             className="panel equipment-panel"
           >
             <div className="panel-title-row">
@@ -277,7 +529,7 @@ export default function App() {
 
             <div className="field-grid">
               <label className="field">
-                <span>Operação</span>
+                <span>{textos.operacao}</span>
                 <select
                   value={eq.operacao}
                   onChange={(e) =>
@@ -290,7 +542,7 @@ export default function App() {
               </label>
 
               <label className="field">
-                <span>Calibração</span>
+                <span>{textos.calibracao}</span>
                 <select
                   value={eq.calibracao}
                   onChange={(e) =>
@@ -304,7 +556,7 @@ export default function App() {
             </div>
 
             <label className="field field-full">
-              <span>Problema</span>
+              <span>{textos.problema}</span>
               <textarea
                 rows={2}
                 value={eq.problema}
@@ -316,7 +568,7 @@ export default function App() {
 
             {eq.usaAcoes && (
               <label className="field field-full">
-                <span>Ações tomadas</span>
+                <span>{textos.acoes}</span>
                 <textarea
                   rows={2}
                   value={eq.acoes}
@@ -330,7 +582,7 @@ export default function App() {
         ))}
 
         <section className="report-panel">
-          <h2>Relatório gerado</h2>
+          <h2>{textos.tituloRelatorio}</h2>
           <pre>{relatorio}</pre>
 
           <div className="action-grid">
