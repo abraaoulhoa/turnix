@@ -271,7 +271,10 @@ export default function App() {
   };
 
   return (
-    <main className="app-shell" style={temaStyle}>
+    <main
+      className={adminAberto ? "app-shell admin-mode" : "app-shell"}
+      style={temaStyle}
+    >
       <div className="app-container">
         <header className="app-header">
           <div>

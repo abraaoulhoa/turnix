@@ -6,6 +6,11 @@
   transition: background 0.2s ease;
 }
 
+.app-shell.admin-mode {
+  color: #e6fffb;
+  background: #06151b;
+}
+
 .app-container {
   width: min(920px, 100%);
   margin: 0 auto;
@@ -68,6 +73,15 @@
   background: #ffffff;
 }
 
+.admin-mode .admin-panel,
+.admin-mode .panel,
+.admin-mode .report-panel {
+  border-color: rgba(191, 247, 234, 0.18);
+  color: #e6fffb;
+  background: #0b242b;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3);
+}
+
 .panel,
 .admin-panel {
   display: grid;
@@ -99,6 +113,16 @@
   font-weight: 900;
 }
 
+.admin-mode .panel h2,
+.admin-mode .report-panel h2,
+.admin-mode .admin-panel h2,
+.admin-mode .admin-panel h3,
+.admin-mode .admin-equipment-card strong,
+.admin-mode .field span,
+.admin-mode .color-field span {
+  color: #bff7ea;
+}
+
 .admin-actions {
   display: flex;
   flex-wrap: wrap;
@@ -124,6 +148,11 @@
   border-radius: 8px;
   padding: 14px;
   background: #f8fcfa;
+}
+
+.admin-mode .admin-equipment-card {
+  border-color: rgba(191, 247, 234, 0.18);
+  background: #102f38;
 }
 
 .admin-equipment-card strong {
@@ -238,6 +267,24 @@ textarea {
     border-color 0.2s ease,
     box-shadow 0.2s ease,
     background 0.2s ease;
+}
+
+.admin-mode input,
+.admin-mode select,
+.admin-mode textarea {
+  border-color: rgba(191, 247, 234, 0.2);
+  color: #e6fffb;
+  background: #071b21;
+}
+
+.admin-mode input:hover,
+.admin-mode select:hover,
+.admin-mode textarea:hover,
+.admin-mode input:focus,
+.admin-mode select:focus,
+.admin-mode textarea:focus {
+  border-color: #5eead4;
+  background: #0d2b33;
 }
 
 textarea {
