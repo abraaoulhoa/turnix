@@ -39,7 +39,7 @@ const TEXTOS_PADRAO = {
   tituloDados: "Dados gerais",
   tituloRelatorio: "Relatório gerado",
   prefixoRelatorio: "RELATÓRIO DE TURNO",
-  onlines: "Onlines",
+  onlines: "Online",
   turno: "Turno",
   escala: "Escala",
   data: "Data",
